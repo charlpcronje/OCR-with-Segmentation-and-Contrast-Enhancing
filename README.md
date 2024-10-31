@@ -1,389 +1,413 @@
 # OCR with Segmentation and Contrast Enhancing
 
 [![GitHub](https://img.shields.io/github/license/charlpcronje/OCR-with-Segmentation-and-Contrast-Enhancing)](https://github.com/charlpcronje/OCR-with-Segmentation-and-Contrast-Enhancing/blob/main/LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/downloads/)
-[![Flask](https://img.shields.io/badge/Flask-2.0.1-green)](https://flask.palletsprojects.com/)
+[![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
+[![Flask](https://img.shields.io/badge/flask-2.0.1-green)](https://flask.palletsprojects.com/)
 
-## Table of Contents
+## Overview
 
-- [Introduction](#introduction)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-  - [Command-Line Interface (CLI)](#command-line-interface-cli)
-  - [API Usage](#api-usage)
-  - [Web UI](#web-ui)
-- [Configuration](#configuration)
-  - [config.json](#configjson)
-  - [.env File](#env-file)
-- [Image Effects](#image-effects)
-- [Segmentation](#segmentation)
-- [Logging](#logging)
-- [Cache Management](#cache-management)
-- [Dependencies](#dependencies)
-- [Contributing](#contributing)
-- [License](#license)
+This project is a Python application that performs Optical Character Recognition (OCR) on images, specifically designed to handle extremely tall images by segmenting them and applying various image preprocessing effects to enhance OCR accuracy. It can be accessed via the command line, a Flask API, or a web interface.
 
----
-
-## Introduction
-
-**OCR with Segmentation and Contrast Enhancing** is a Python-based Optical Character Recognition (OCR) application designed to process large images efficiently. It segments images into manageable chunks, applies configurable image enhancements to improve text recognition, and provides access through both a Command-Line Interface (CLI) and a Flask API.
-
-**GitHub Repository**: [https://github.com/charlpcronje/OCR-with-Segmentation-and-Contrast-Enhancing](https://github.com/charlpcronje/OCR-with-Segmentation-and-Contrast-Enhancing)
-
----
+**GitHub Repository**: [OCR-with-Segmentation-and-Contrast-Enhancing](https://github.com/charlpcronje/OCR-with-Segmentation-and-Contrast-Enhancing)
 
 ## Features
 
-- **Image Segmentation**: Efficiently process large images by segmenting them into smaller, manageable chunks with overlapping regions to prevent text loss.
-- **Image Enhancements**: Apply configurable image effects such as contrast enhancement, color inversion, dehazing, and sharpening to improve OCR accuracy.
-- **OCR Processing**: Extract text from images using Tesseract OCR via the `pytesseract` library.
-- **Command-Line Interface**: User-friendly CLI with options to customize logging and word wrapping.
-- **Flask API**: RESTful API endpoint to upload images and receive extracted text in JSON format.
-- **Configuration Files**: Customize application behavior using `config.json` and `.env` files.
-- **Logging System**: Detailed logging with options to output to terminal or log files.
-- **Cache Management**: Efficient cache handling with automatic deletion of old files based on a FIFO strategy.
-- **Markdown Report Generation**: Generates a comprehensive markdown report with statistics and OCR results.
+- **Image Segmentation**: Splits large images into smaller segments to improve OCR performance.
+- **Image Preprocessing**: Applies configurable effects such as contrast enhancement, dehazing, and color inversion.
+- **OCR Processing**: Extracts text from images using Tesseract OCR.
+- **Logging**: Detailed logs are maintained with configurable verbosity.
+- **Configuration Management**: Settings can be adjusted via `config.json`, command-line arguments, or API parameters.
+- **Multi-interface Access**: Use the application from the terminal, integrate it into other applications via API, or through a user-friendly web interface.
+- **Web Interface**: Drag-and-drop images onto a web page for OCR processing with real-time log display.
 
----
+## Table of Contents
+
+- [Installation](#installation)
+- [Configuration](#configuration)
+  - [config.json](#configjson)
+  - [.env](#env)
+- [Usage](#usage)
+  - [Command Line Interface](#command-line-interface)
+    - [Basic Usage](#basic-usage)
+    - [Options](#options)
+  - [Flask API](#flask-api)
+    - [Starting the Server](#starting-the-server)
+    - [API Endpoints](#api-endpoints)
+  - [Web Interface](#web-interface)
+    - [Accessing the Web UI](#accessing-the-web-ui)
+    - [Uploading Images](#uploading-images)
+- [Image Effects](#image-effects)
+- [Segments](#segments)
+- [.env File](#env-file)
+- [Dependencies](#dependencies)
+- [Logging](#logging)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Installation
 
-1. **Clone the Repository**
-
-   ```bash
-   git clone https://github.com/charlpcronje/OCR-with-Segmentation-and-Contrast-Enhancing.git
-   cd OCR-with-Segmentation-and-Contrast-Enhancing
-   ```
-
-2. **Create a Virtual Environment**
-
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-   ```
-
-3. **Install Dependencies**
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Install Tesseract OCR**
-
-   - **Windows**: Download and install from [UB Mannheim](https://github.com/UB-Mannheim/tesseract/wiki).
-   - **macOS**: Install via Homebrew:
-
-     ```bash
-     brew install tesseract
-     ```
-
-   - **Linux**: Install via package manager:
-
-     ```bash
-     sudo apt-get install tesseract-ocr
-     ```
-
-5. **Set Up Configuration Files**
-
-   - **config.json**: Copy the provided `config.example.json` to `config.json` and customize as needed.
-   - **.env**: Create a `.env` file and define the necessary environment variables.
-
----
-
-## Usage
-
-### Command-Line Interface (CLI)
-
-The CLI allows you to process images directly from the terminal.
-
-#### Syntax
+### Clone the Repository
 
 ```bash
-ocr <input_file> <output_file> [options]
+git clone https://github.com/charlpcronje/OCR-with-Segmentation-and-Contrast-Enhancing.git
+cd OCR-with-Segmentation-and-Contrast-Enhancing
 ```
 
-#### Options
+### Install Dependencies
 
-- `--logs [verbose|error|file|terminal]`: Set the log output and level.
-- `--word-wrap [true|false]`: Override the `word_wrap` setting from `config.json`.
-
-#### Example
-
-```bash
-ocr input_image.png output_text.md --word-wrap false --logs verbose
-```
-
-This command processes `input_image.png`, writes the OCR result to `output_text.md`, disables word wrapping, and sets the logging level to verbose.
-
-### API Usage
-
-The Flask API provides an endpoint to upload images and receive extracted text in JSON format.
-
-#### Starting the API Server
-
-```bash
-python api_server.py
-```
-
-The server will start on the port specified in the `.env` file.
-
-#### API Endpoint
-
-- **URL**: `http://localhost:{API_PORT}/api/ocr`
-- **Method**: `POST`
-- **Content-Type**: `multipart/form-data`
-- **Form Data**: `image` (The image file to be processed)
-
-#### Example Using `curl`
-
-```bash
-curl -X POST -F "image=@input_image.png" http://localhost:{API_PORT}/api/ocr
-```
-
-#### Response
-
-```json
-{
-  "text": "Extracted text content...",
-  "word_count": 100,
-  "char_count": 500,
-  "md5_hash": "d41d8cd98f00b204e9800998ecf8427e"
-}
-```
-
-### Web UI
-
-*Note: If a web UI is implemented, include instructions here. Otherwise, remove this section.*
-
----
-
-## Configuration
-
-### config.json
-
-The `config.json` file allows you to customize various aspects of the application.
-
-#### Example
-
-```json
-{
-  "segment_height": 1000,
-  "overlap_pixels": 25,
-  "effects": {
-    "increase_contrast": true,
-    "invert_colors": true,
-    "dehaze": true,
-    "sharpen": false
-  },
-  "word_wrap": 80,
-  "log_level": "verbose"
-}
-```
-
-#### Configuration Options
-
-- **segment_height**: (Integer) Height of each image segment in pixels.
-- **overlap_pixels**: (Integer) Number of pixels by which segments overlap to prevent text loss.
-- **effects**: (Object) Configurable image effects.
-  - **increase_contrast**: (Boolean) Enhance image contrast.
-  - **invert_colors**: (Boolean) Invert image colors.
-  - **dehaze**: (Boolean) Apply a dehazing effect.
-  - **sharpen**: (Boolean) Sharpen the image.
-- **word_wrap**: (Integer) Maximum line width for word wrapping. Set to 0 for no wrapping.
-- **log_level**: (String) Default logging level (`verbose`, `error`, etc.).
-
-### .env File
-
-The `.env` file stores environment variables for the application.
-
-#### Example
-
-```bash
-API_PORT=5000
-LOG_FOLDER_PATH=./logs
-```
-
-#### Environment Variables
-
-- **API_PORT**: Port number on which the Flask API server runs.
-- **LOG_FOLDER_PATH**: Directory path where log files are stored.
-
----
-
-## Image Effects
-
-Image effects are applied sequentially to enhance OCR accuracy. They can be enabled or disabled in `config.json`.
-
-### Available Effects
-
-1. **Increase Contrast**
-   - Enhances the contrast of the image.
-   - Makes text stand out against the background.
-
-2. **Invert Colors**
-   - Inverts the colors of the image.
-   - Useful for images with light text on dark backgrounds.
-
-3. **Dehaze**
-   - Reduces haze and noise.
-   - Improves clarity and sharpness.
-
-4. **Sharpen**
-   - Enhances edges in the image.
-   - Makes text edges more distinct.
-
-### Configuration Example
-
-```json
-"effects": {
-  "increase_contrast": true,
-  "invert_colors": false,
-  "dehaze": true,
-  "sharpen": true
-}
-```
-
-### Effect Application Order
-
-Effects are applied in the order they appear in `config.json`. Adjust the order if necessary to achieve the best results.
-
----
-
-## Segmentation
-
-Large images are segmented to improve OCR processing efficiency and accuracy.
-
-### How Segmentation Works
-
-- **Primary Segments**: Image is divided into chunks of `segment_height` pixels starting from the top.
-- **Secondary Segments**: Additional segments are created, starting `overlap_pixels` pixels below each primary segment.
-- **Overlapping**: Segments overlap by `overlap_pixels` to ensure that text split between segments is captured.
-
-### Purpose
-
-- **Manageability**: Prevents issues with processing very large images.
-- **Text Integrity**: Ensures that lines of text are not cut off between segments.
-
-### Configuration
-
-- **segment_height**: Defines the height of each segment.
-- **overlap_pixels**: Specifies the overlap between segments.
-
-### Example
-
-If `segment_height` is 1000 pixels and `overlap_pixels` is 25 pixels:
-
-- **Primary Segments Start At**: 0, 1000, 2000, ...
-- **Secondary Segments Start At**: 25, 1025, 2025, ...
-
----
-
-## Logging
-
-The application includes a robust logging system configurable via `config.json` or CLI options.
-
-### Log Outputs
-
-- **Terminal**: Logs are displayed in the console.
-- **Log Files**: Logs are written to `logs/logs-{date}.log`.
-
-### Log Levels
-
-- **verbose**: Detailed information for debugging.
-- **error**: Only error messages.
-
-### Configuration
-
-- **config.json**: Set the default `log_level`.
-- **CLI Option**: Override using `--logs [level]`.
-
-### Example
-
-```bash
-ocr input_image.png output_text.md --logs error
-```
-
-This command sets the logging level to error, overriding the `config.json` setting.
-
----
-
-## Cache Management
-
-To manage disk space and improve performance, the application implements cache management.
-
-### Features
-
-- **Storage Location**: All segments and cache files are stored in `logs/segments/`.
-- **File Limit**: Keeps only the latest 500 files.
-- **FIFO Strategy**: Automatically deletes the oldest files when the limit is exceeded.
-
-### Configuration
-
-- The file limit is currently hardcoded to 500 but can be modified in the source code if needed.
-
----
-
-## Dependencies
-
-The application relies on several Python libraries and external tools.
-
-### Python Libraries
-
-- **Pillow**: Image processing.
-- **OpenCV**: Advanced image operations.
-- **pytesseract**: OCR processing.
-- **Flask**: API development.
-- **python-dotenv**: Environment variable management.
-- **argparse**: Command-line argument parsing.
-- **logging**: Logging functionality.
-
-### External Tools
-
-- **Tesseract OCR**: The OCR engine used for text extraction.
-
-### Installation
-
-All Python dependencies are listed in `requirements.txt` and can be installed using:
+Install the required Python packages using pip:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Ensure that Tesseract OCR is installed on your system and accessible in your system's PATH.
+### Install Tesseract OCR
 
----
+Ensure that Tesseract OCR is installed on your system:
+
+- **Ubuntu/Debian**:
+
+  ```bash
+  sudo apt-get install tesseract-ocr
+  ```
+
+- **macOS** (using Homebrew):
+
+  ```bash
+  brew install tesseract
+  ```
+
+- **Windows**:
+
+  Download and install from [Tesseract OCR GitHub Releases](https://github.com/UB-Mannheim/tesseract/wiki).
+
+### Verify Tesseract Installation
+
+Ensure that Tesseract is accessible from the command line. If not, you may need to specify the path in the code:
+
+```python
+pytesseract.pytesseract.tesseract_cmd = '/path/to/tesseract'
+```
+
+## Configuration
+
+### config.json
+
+The `config.json` file contains the default configuration settings for the application.
+
+```json
+{
+  "effects_to_try": [
+    {"name": "increase_contrast", "enabled": true},
+    {"name": "dehaze", "enabled": true},
+    {"name": "invert_colors", "enabled": true},
+    {"name": "enhance_texture", "enabled": false}
+  ],
+  "segment_height": 1000,
+  "segment_overlap": 25,
+  "word_wrap": 80,
+  "iterations": 1,
+  "logging": {
+    "level": "INFO",
+    "console": true,
+    "file": true
+  }
+}
+```
+
+#### Configuration Parameters
+
+- **effects_to_try**: A list of image preprocessing effects to enhance OCR accuracy.
+- **segment_height**: Height of each image segment in pixels.
+- **segment_overlap**: Overlap between image segments in pixels to prevent cutting through lines of text.
+- **word_wrap**: Character count at which to wrap text; `0` for no wrapping.
+- **iterations**: Number of times to try processing with different segmentations and effects.
+- **logging**: Logging settings including level and output destinations.
+
+### .env
+
+The `.env` file stores environment-specific configurations.
+
+```
+FLASK_RUN_PORT=5000
+LOGS_FOLDER_PATH=logs/
+```
+
+#### Environment Variables
+
+- **FLASK_RUN_PORT**: The port on which the Flask app runs.
+- **LOGS_FOLDER_PATH**: The directory where logs and segments are stored.
+
+## Usage
+
+### Command Line Interface
+
+#### Basic Usage
+
+```bash
+python ocr.py input_image.png output.md
+```
+
+#### With Options
+
+You can override any configuration setting using command-line arguments.
+
+```bash
+python ocr.py input_image.png output.md --effects_to_try increase_contrast,dehaze --segment_height 800 --logging_level DEBUG
+```
+
+#### Options
+
+- `--effects_to_try`: Comma-separated list of effects (`increase_contrast`, `dehaze`, `invert_colors`, `enhance_texture`).
+- `--segment_height`: Height of each image segment in pixels.
+- `--segment_overlap`: Overlap between segments in pixels.
+- `--word_wrap`: Character count at which to wrap text; `0` for no wrapping.
+- `--iterations`: Number of iterations with different segmentations and effects.
+- `--logging_level`: Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`).
+- `--logging_console`: Enable console logging (`True` or `False`).
+- `--logging_file`: Enable file logging (`True` or `False`).
+
+### Flask API
+
+#### Starting the Server
+
+```bash
+export FLASK_APP=interfaces/api_interface.py
+flask run
+```
+
+#### API Endpoints
+
+- **Upload and OCR Processing**
+
+  - **URL**: `http://localhost:5000/upload`
+  - **Method**: `POST`
+  - **Form Data**:
+    - `file`: The image file to process.
+  - **Parameters**: Any configuration setting can be overridden via URL parameters.
+
+  **Example Request**:
+
+  ```bash
+  curl -X POST -F 'file=@input_image.png' 'http://localhost:5000/upload?effects_to_try=increase_contrast,dehaze&segment_height=800'
+  ```
+
+- **Log Streaming**
+
+  - **URL**: `http://localhost:5000/logs`
+  - **Method**: `GET`
+  - **Parameters**:
+    - `task_id`: The unique task identifier returned after uploading a file.
+
+### Web Interface
+
+#### Accessing the Web UI
+
+Navigate to `https://ocr.webally.co.za` in your web browser.
+
+#### Uploading Images
+
+- Drag and drop an image onto the black screen.
+- A message "DROP FOR OCR" will appear when you drag an image over the page.
+- Once you drop the image, it will automatically upload and start processing.
+- Real-time logs will display in a terminal-like block.
+- After processing, the terminal block will expand, and the OCR result will be displayed.
+
+## Image Effects
+
+The application uses various image preprocessing effects to enhance OCR accuracy. The effects are applied in the order specified in `config.json`.
+
+### Available Effects
+
+- **increase_contrast**: Enhances the contrast of the image using CLAHE (Contrast Limited Adaptive Histogram Equalization).
+- **dehaze**: Reduces haze in the image to improve clarity. Implementation may vary; could use histogram equalization or more advanced dehazing algorithms.
+- **invert_colors**: Inverts the colors of the image, which can help OCR in some cases where text and background have low contrast.
+- **enhance_texture**: Placeholder for texture enhancement; currently not implemented.
+
+### Configuring Effects
+
+Enable or disable effects in the `config.json`, via command-line arguments, or API parameters.
+
+```json
+"effects_to_try": [
+  {"name": "increase_contrast", "enabled": true},
+  {"name": "dehaze", "enabled": false},
+  {"name": "invert_colors", "enabled": true},
+  {"name": "enhance_texture", "enabled": false}
+],
+```
+
+#### Effect Descriptions
+
+- **Increase Contrast**: Improves the contrast between text and background, making text more distinguishable.
+- **Dehaze**: Removes haze or fog-like effects from images, which can obscure text.
+- **Invert Colors**: Switches light pixels to dark and vice versa; useful when text is lighter than the background.
+- **Enhance Texture**: Aims to highlight textural features; not currently implemented.
+
+## Segments
+
+To handle extremely tall images, the application segments the image into smaller pieces.
+
+- **segment_height**: The height of each segment in pixels (default is 1000).
+- **segment_overlap**: The number of pixels to overlap between segments (default is 25).
+- **Purpose**: Prevents missing any text by ensuring lines are not cut off between segments.
+- **Storage**: Segments are saved in the `logs/segments` directory.
+- **Maintenance**: The application maintains a maximum of 500 segment files, deleting the oldest files when the limit is exceeded.
+
+### How Segmentation Works
+
+1. **Initial Segmentation**: The image is divided into segments of `segment_height` pixels.
+2. **Overlapping Segments**: Each segment overlaps the previous one by `segment_overlap` pixels.
+3. **Processing**: Each segment is processed individually through the image preprocessing and OCR pipeline.
+4. **Combining Results**: The text extracted from each segment is combined to form the final output.
+
+## .env File
+
+The `.env` file is used to set environment-specific variables, primarily for the Flask application and logging.
+
+### Variables
+
+- **FLASK_RUN_PORT**: Specifies the port on which the Flask application will run.
+- **LOGS_FOLDER_PATH**: Defines the directory where logs and image segments will be stored.
+
+### Example
+
+```
+FLASK_RUN_PORT=5000
+LOGS_FOLDER_PATH=logs/
+```
+
+### Usage
+
+The application uses the `python-dotenv` package to load variables from the `.env` file. Ensure that the `.env` file is in the root directory of the project.
+
+## Dependencies
+
+- **Python 3.8+**
+- **Required Packages**:
+  - Flask
+  - Flask-SSE
+  - Flask-Cors
+  - pytesseract
+  - Pillow
+  - OpenCV (`opencv-python`)
+  - python-dotenv
+
+Install all dependencies using:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Additional Requirements
+
+- **Tesseract OCR**: The application relies on Tesseract for OCR processing. Ensure it is installed and accessible.
+- **Web Server**: If deploying the web interface, you may need a web server like Nginx or Apache to serve static files and proxy requests.
+
+## Logging
+
+- **Log Levels**: Configurable via `config.json` and command-line arguments.
+- **Outputs**:
+  - **Console**: Logs are printed to the terminal if enabled.
+  - **File**: Logs are saved in `logs/logs-{date}.log`.
+- **Customization**: You can set the logging level and outputs in the configuration.
+
+### Adjusting Logging Settings
+
+In `config.json`:
+
+```json
+"logging": {
+  "level": "DEBUG",
+  "console": true,
+  "file": true
+}
+```
+
+Via Command-Line:
+
+```bash
+python ocr.py input_image.png output.md --logging_level DEBUG --logging_console True --logging_file True
+```
+
+## Project Structure
+
+```
+OCR-with-Segmentation-and-Contrast-Enhancing/
+├── ocr.py
+├── config.json
+├── .env
+├── requirements.txt
+├── README.md
+├── logs/
+│   ├── logs-{date}.log
+│   └── segments/
+├── uploads/
+├── interfaces/
+│   ├── cli_interface.py
+│   └── api_interface.py
+├── modules/
+│   ├── configuration.py
+│   ├── image_preprocessing.py
+│   ├── image_segmentation.py
+│   ├── logging_module.py
+│   ├── ocr_processing.py
+│   └── utils.py
+├── static/
+│   ├── index.html
+│   ├── styles.css
+│   └── script.js
+```
+
+- **ocr.py**: Entry point for the CLI application.
+- **config.json**: Configuration file for default settings.
+- **.env**: Environment variables.
+- **interfaces/**: Contains the CLI and API interfaces.
+- **modules/**: Contains the core modules for image segmentation, preprocessing, OCR processing, etc.
+- **static/**: Contains the web interface files.
+- **logs/**: Stores log files and image segments.
+- **uploads/**: Directory for uploaded images via the web interface.
 
 ## Contributing
 
-Contributions are welcome! Please fork the repository and submit a pull request with your changes.
+Contributions are welcome! Please follow these steps:
 
-### Steps to Contribute
+1. **Fork the Repository**:
 
-1. **Fork the Repository**
+   Click the "Fork" button at the top right of the GitHub page.
 
-2. **Create a Feature Branch**
-
-   ```bash
-   git checkout -b feature/YourFeature
-   ```
-
-3. **Commit Your Changes**
+2. **Clone Your Fork**:
 
    ```bash
-   git commit -am 'Add new feature'
+   git clone https://github.com/your-username/OCR-with-Segmentation-and-Contrast-Enhancing.git
    ```
 
-4. **Push to the Branch**
+3. **Create a New Branch**:
 
    ```bash
-   git push origin feature/YourFeature
+   git checkout -b feature/your-feature-name
    ```
 
-5. **Open a Pull Request**
+4. **Make Your Changes**:
 
----
+   Implement your feature or bug fix.
+
+5. **Commit Your Changes**:
+
+   ```bash
+   git commit -am 'Add some feature'
+   ```
+
+6. **Push to the Branch**:
+
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+7. **Open a Pull Request**:
+
+   Navigate to your fork on GitHub and click the "New Pull Request" button.
 
 ## License
 
@@ -391,6 +415,59 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-If you have any questions or need further assistance, please open an issue on GitHub or contact the maintainer.
+## Contact
 
-Happy OCR processing!
+For any questions or issues, please open an issue on GitHub or contact the repository owner.
+
+## Additional Notes
+
+### Testing and Validation
+
+- **Unit Tests**: Implement unit tests for each module to ensure functionality.
+- **Sample Images**: Use a variety of images to test the effectiveness of different preprocessing effects.
+- **Performance**: Monitor performance when processing large images or a high volume of requests.
+
+### Security Considerations
+
+- **File Uploads**: Validate uploaded files to ensure they are images and within acceptable size limits.
+- **Error Handling**: Implement robust error handling to prevent crashes and provide meaningful feedback.
+- **HTTPS**: Use HTTPS to secure communications, especially when deploying the web interface.
+
+### Deployment
+
+- **Web Server Configuration**: Configure your web server to serve the Flask app and static files.
+- **Scaling**: Consider using a WSGI server like Gunicorn or uWSGI for production deployments.
+- **Environment Variables**: Use environment variables for sensitive configurations and in production environments.
+
+## Frequently Asked Questions (FAQ)
+
+### 1. **I get an error saying `pytesseract.pytesseract.TesseractNotFoundError`. What should I do?**
+
+Ensure that Tesseract OCR is installed on your system and accessible via the command line. If Tesseract is installed in a non-standard location, specify the path in your code:
+
+```python
+pytesseract.pytesseract.tesseract_cmd = r'/path/to/tesseract'
+```
+
+### 2. **Can I add new image preprocessing effects?**
+
+Yes! You can implement new effects in the `ImagePreprocessingModule` within `image_preprocessing.py`. Add your effect function and update the `effects_to_try` configuration.
+
+### 3. **How do I change the logging level to see more detailed logs?**
+
+You can change the logging level in `config.json` or override it via the command line:
+
+```bash
+python ocr.py input_image.png output.md --logging_level DEBUG
+```
+
+### 4. **The OCR results are not accurate. What can I do?**
+
+- Experiment with different image preprocessing effects.
+- Adjust the `segment_height` and `segment_overlap` parameters.
+- Ensure that the image quality is sufficient for OCR.
+- Consider training Tesseract with custom data if working with specialized fonts.
+
+---
+
+Feel free to contribute, report issues, or suggest enhancements. Your feedback is valuable!
