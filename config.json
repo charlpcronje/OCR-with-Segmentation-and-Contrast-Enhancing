@@ -1,0 +1,18 @@
+{
+    "effects_to_try": [
+      {"name": "increase_contrast", "enabled": true},
+      {"name": "dehaze", "enabled": true},
+      {"name": "invert_colors", "enabled": true},
+      {"name": "enhance_texture", "enabled": false}
+    ],
+    "segment_height": 1000,
+    "segment_overlap": 25,
+    "word_wrap": 80,
+    "iterations": 1,
+    "logging": {
+      "level": "INFO",
+      "console": true,
+      "file": true
+    }
+  }
+  
